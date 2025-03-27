@@ -1,0 +1,29 @@
+# Macro file for example B1
+# 
+# Can be run in batch, without graphic
+# or interactively: Idle> /control/execute run1.mac
+#
+#
+# Initialize kernel
+/run/initialize
+#
+/control/verbose 1
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+#
+# 
+# electron 500 KeV to the direction (0.,0.,1.) - our exapmple
+#
+/gps/particle e-
+/gps/direction 0 0 1
+/gps/ene/type Mono
+/gps/ene/mono 250 keV
+/gps/pos/type Plane
+/gps/pos/shape Annulus
+/gps/pos/centre 0 0 0
+/gps/pos/radius 26 mm
+/gps/pos/inner_radius 24 mm
+
+#
+/run/beamOn 100000000
