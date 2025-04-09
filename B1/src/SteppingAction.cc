@@ -46,6 +46,12 @@ G4double x, y, z, kinEn;
 G4int track_num;
 G4String particleName;
 G4bool isFirstStepInVolume;
+
+// Track the total energy deposited in each volume
+static G4double totalEdepMain = 0.0;
+static G4double totalEdepPan07 = 0.0;
+static G4double totalEdepPan10 = 0.0;
+
 namespace B1
 {
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -74,21 +80,40 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   G4LogicalVolume* volume = step->GetPreStepPoint()->GetTouchableHandle()
                               ->GetVolume()->GetLogicalVolume();
   
+  // Calculate energy deposited in this step
+  G4double edepStep = step->GetTotalEnergyDeposit();
+  
   // Process the step if it's in any of our scoring volumes
   bool isInScoringVolume = false;
   G4String volumeName;
+  G4double currentTotalEdep = 0.0;  // Total energy deposited in the current volume
   
   if (volume == fScoringVolume) {
     isInScoringVolume = true;
     volumeName = "ScoringVolume";
+    totalEdepMain += edepStep;
+    currentTotalEdep = totalEdepMain;
+    
+    // Add energy deposition for the main scoring volume
+    fEventAction->AddEdep(edepStep);
   }
   else if (volume == fScoringPan07) {
     isInScoringVolume = true;
     volumeName = "ScoringPan07";
+    totalEdepPan07 += edepStep;
+    currentTotalEdep = totalEdepPan07;
+    
+    // If you have a method to track energy in Pan07
+    // fEventAction->AddEdepPan07(edepStep);
   }
   else if (volume == fScoringPan10) {
     isInScoringVolume = true;
     volumeName = "ScoringPan10";
+    totalEdepPan10 += edepStep;
+    currentTotalEdep = totalEdepPan10;
+    
+    // If you have a method to track energy in Pan10
+    // fEventAction->AddEdepPan10(edepStep);
   }
   
   if (!isInScoringVolume) return;
@@ -102,17 +127,34 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   isFirstStepInVolume = step->IsFirstStepInVolume();
   particleName = step->GetTrack()->GetParticleDefinition()->GetParticleName();
   
+  // Calculate dose in Gray (J/kg)
+  G4double dose = 0.0;
+  if (volume == fScoringVolume && fScoringVolume) {
+    G4double mass = fScoringVolume->GetMass();
+    if (mass > 0) {
+      dose = currentTotalEdep / mass / gray;  // Convert to Gray units
+    }
+  }
+  else if (volume == fScoringPan07 && fScoringPan07) {
+    G4double mass = fScoringPan07->GetMass();
+    if (mass > 0) {
+      dose = currentTotalEdep / mass / gray;  // Convert to Gray units
+    }
+  }
+  else if (volume == fScoringPan10 && fScoringPan10) {
+    G4double mass = fScoringPan10->GetMass();
+    if (mass > 0) {
+      dose = currentTotalEdep / mass / gray;  // Convert to Gray units
+    }
+  }
+  
   FILE *f_out;
   f_out = fopen(output_name, "a");
-  fprintf(f_out, "%d %e %e %e %e %d %s %s\n", 
+  fprintf(f_out, "%d %e %e %e %e %d %s %s %e\n", 
           track_num, x / mm, y / mm, z / mm, kinEn / keV, 
           isFirstStepInVolume, static_cast<char const *>(particleName),
-          static_cast<char const *>(volumeName));
+          static_cast<char const *>(volumeName), dose);
   fclose(f_out);
-  
-  // Collect energy deposited in this step
-  G4double edepStep = step->GetTotalEnergyDeposit();
-  fEventAction->AddEdep(edepStep);
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 }
