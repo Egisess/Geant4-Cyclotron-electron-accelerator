@@ -40,6 +40,7 @@
 #include "G4LogicalVolume.hh"
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
+#include <vector>
 
 namespace B1
 {
@@ -76,7 +77,6 @@ void RunAction::BeginOfRunAction(const G4Run*)
   // reset accumulables to their initial values
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -100,7 +100,17 @@ void RunAction::EndOfRunAction(const G4Run* run)
 
   const auto detConstruction = static_cast<const DetectorConstruction*>(
     G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-  G4double mass = detConstruction->GetScoringVolume()->GetMass();
+  
+  // Get the first scoring volume (main scoring volume) from GetScoringVolumes
+  std::vector<G4LogicalVolume*> scoringVolumes = detConstruction->GetScoringVolumes();
+  
+  if (scoringVolumes.empty()) {
+    G4cerr << "Error: No scoring volumes defined!" << G4endl;
+    return;
+  }
+  
+  G4LogicalVolume* mainScoringVolume = scoringVolumes[0];
+  G4double mass = mainScoringVolume->GetMass();
   G4double dose = edep/mass;
   G4double rmsDose = rms/mass;
 
@@ -136,7 +146,7 @@ void RunAction::EndOfRunAction(const G4Run* run)
      << G4endl
      << " The run consists of " << nofEvents << " "<< runCondition
      << G4endl
-     << " Cumulated dose per run, in scoring volume : "
+     << " Cumulated dose per run, in main scoring volume : "
      << G4BestUnit(dose,"Dose") << " rms = " << G4BestUnit(rmsDose,"Dose")
      << G4endl
      << "------------------------------------------------------------"
