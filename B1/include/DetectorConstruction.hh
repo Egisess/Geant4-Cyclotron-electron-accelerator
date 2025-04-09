@@ -32,6 +32,7 @@
 
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
+#include <vector>
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
@@ -49,10 +50,19 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     G4VPhysicalVolume* Construct() override;
 
-    G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
+    // Change the return type to a vector of logical volumes
+  std::vector<G4LogicalVolume*> GetScoringVolumes() const {
+    std::vector<G4LogicalVolume*> volumes;
+    if (fScoringVolume) volumes.push_back(fScoringVolume);
+    if (fScoringPan07) volumes.push_back(fScoringPan07);
+    if (fScoringPan10) volumes.push_back(fScoringPan10);
+    return volumes;
+}
 
   protected:
     G4LogicalVolume* fScoringVolume = nullptr;
+    G4LogicalVolume* fScoringPan07 = nullptr;
+    G4LogicalVolume* fScoringPan10 = nullptr;
 };
 
 }

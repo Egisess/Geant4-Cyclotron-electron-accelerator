@@ -285,6 +285,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Set AirDetector as scoring volume
   //
   fScoringVolume = logicDetector;
+  fScoringPan07 = logicDetector07;
+  fScoringPan10 = logicDetector10;
 
   //
   //always return the physical World
