@@ -63,8 +63,8 @@ RunAction::RunAction()
 
   // Register accumulable to the accumulable manager
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
-  accumulableManager->RegisterAccumulable(fEdep);
-  accumulableManager->RegisterAccumulable(fEdep2);
+  accumulableManager->Register(fEdep);
+  accumulableManager->Register(fEdep2);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
