@@ -90,7 +90,7 @@ namespace B1
     //
     G4double R_inner = 30 * mm;
     G4double R_outer = 36 * mm;
-    G4double L_tube = 50 * mm + 30 * mm;
+    G4double L_tube = 51.5 * mm;
     G4double phi_0 = 0;
     G4double phi_1 = 2 * M_PI;
     G4ThreeVector n_bot = G4ThreeVector(0., 0., -1.);
@@ -113,14 +113,14 @@ namespace B1
                       checkOverlaps);  // overlaps checking
 
     G4VisAttributes *copperVisAttributes = new G4VisAttributes(G4Colour(0.7, 0.4, 0.1));
-    // copperVisAttributes->SetForceWireframe(true); // Translucenty
+    copperVisAttributes->SetForceWireframe(true); // Translucenty
     logicTube->SetVisAttributes(copperVisAttributes); // Setting copper colour for copper
 
     //
     // Target 1 layer
     //
     G4Material *target1_mat = nist->FindOrBuildMaterial("G4_W");
-    G4ThreeVector pos1 = G4ThreeVector(0, 0, 50.0 * mm - 1 * mm);
+    G4ThreeVector pos1 = G4ThreeVector(0, 0, 50.5 * mm );
 
     // Blinchik wolfram
     G4double R_inner_target = 0 * mm;
@@ -154,7 +154,7 @@ namespace B1
     // Target 2 layer
     //
     G4Material *target2_mat = nist->FindOrBuildMaterial("G4_Cu");
-    G4ThreeVector pos2 = G4ThreeVector(0, 0, 50.0 * mm);
+    G4ThreeVector pos2 = G4ThreeVector(0, 0, 51 * mm);
 
     // Blinchik cuprum
 
@@ -183,7 +183,7 @@ namespace B1
     G4ThreeVector pos3 = G4ThreeVector(0, 0, L_tube);
     // Rotation
     G4RotationMatrix *rot3 = new G4RotationMatrix();
-    rot3->rotateX(-90 * deg);
+    rot3->rotateX(-45 * deg);
     rot3->rotateY(0 * deg);
     rot3->rotateZ(0 * deg);
 

@@ -26,4 +26,4 @@
 /gps/pos/inner_radius 24 mm
 
 #
-/run/beamOn 100000000
+/run/beamOn 1000000000
