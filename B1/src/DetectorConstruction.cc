@@ -47,253 +47,252 @@
 namespace B1
 {
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4VPhysicalVolume* DetectorConstruction::Construct()
-{
-  // Get nist material manager
-  G4NistManager* nist = G4NistManager::Instance();
+  G4VPhysicalVolume *DetectorConstruction::Construct()
+  {
+    // Get nist material manager
+    G4NistManager *nist = G4NistManager::Instance();
 
-  // Tube material
-  //
-  G4Material* tube_mat = nist->FindOrBuildMaterial("G4_Cu");
+    // Tube material
+    //
+    G4Material *tube_mat = nist->FindOrBuildMaterial("G4_Cu");
 
-  // Option to switch on/off checking of volumes overlaps
-  //
-  G4bool checkOverlaps = true;
+    // Option to switch on/off checking of volumes overlaps
+    //
+    G4bool checkOverlaps = true;
 
-  //
-  // World
-  //
-  G4double world_sizeXY = 400 * cm;
-  G4double world_sizeZ  = 400 * cm;
-  G4Material* world_mat = nist->FindOrBuildMaterial("G4_AIR");
+    //
+    // World
+    //
+    G4double world_sizeXY = 400 * cm;
+    G4double world_sizeZ = 400 * cm;
+    G4Material *world_mat = nist->FindOrBuildMaterial("G4_AIR");
 
-  auto solidWorld = new G4Box("World",                           // its name
-    0.5 * world_sizeXY, 0.5 * world_sizeXY, 0.5 * world_sizeZ);  // its size
+    auto solidWorld = new G4Box("World",                                                    // its name
+                                0.5 * world_sizeXY, 0.5 * world_sizeXY, 0.5 * world_sizeZ); // its size
 
-  auto logicWorld = new G4LogicalVolume(solidWorld,  // its solid
-    world_mat,                                       // its material
-    "World");                                        // its name
+    auto logicWorld = new G4LogicalVolume(solidWorld, // its solid
+                                          world_mat,  // its material
+                                          "World");   // its name
 
-  auto physWorld = new G4PVPlacement(nullptr,  // no rotation
-    G4ThreeVector(),                           // at (0,0,0)
-    logicWorld,                                // its logical volume
-    "World",                                   // its name
-    nullptr,                                   // its mother  volume
-    false,                                     // no boolean operation
-    0,                                         // copy number
-    checkOverlaps);                            // overlaps checking
+    auto physWorld = new G4PVPlacement(nullptr,         // no rotation
+                                       G4ThreeVector(), // at (0,0,0)
+                                       logicWorld,      // its logical volume
+                                       "World",         // its name
+                                       nullptr,         // its mother  volume
+                                       false,           // no boolean operation
+                                       0,               // copy number
+                                       checkOverlaps);  // overlaps checking
 
-  //
-  // Tube
-  //
-  G4double R_inner = 30 * mm;
-  G4double R_outer = 36 * mm;
-  G4double L_tube = 50 * mm + 30 * mm;
-  G4double phi_0 = 0;
-  G4double phi_1 =  2 * M_PI;
-  G4ThreeVector n_bot = G4ThreeVector(0., 0., -1.);
-  G4ThreeVector n_top = G4ThreeVector(0., 0., 1.);
-  
-  auto solidTube = new G4CutTubs("MyTube",                    // its name
-     R_inner, R_outer, L_tube, phi_0, phi_1, n_bot, n_top );  // its size
+    G4double L_tube = 50 * mm + 30 * mm;
+    G4VisAttributes *copperVisAttributes = new G4VisAttributes(G4Colour(0.7, 0.4, 0.1));
 
-  auto logicTube = new G4LogicalVolume(solidTube,  // its solid
-    tube_mat,                                     // its material
-    "MyTube");                                 // its name
+    //
+    // Target 1 layer
+    //
+    G4Material *target1_mat = nist->FindOrBuildMaterial("G4_W");
+    G4ThreeVector pos1 = G4ThreeVector(0, 0, 50.0 * mm);
 
-  new G4PVPlacement(nullptr,  // no rotation
-    G4ThreeVector(),          // at (0,0,0)
-    logicTube,                 // its logical volume
-    "MyTube",               // its name
-    logicWorld,               // its mother  volume
-    false,                    // no boolean operation
-    0,                        // copy number
-    checkOverlaps);           // overlaps checking
+    // Blinchik wolfram
+    G4double R_inner_target = 0 * mm;
+    G4double R_outer_target = 30 * mm;
+    G4double L_tube_target = 0.5 * mm;
+    G4double phi_0_target = 0;
+    G4double phi_1_target = 2 * M_PI;
+    G4ThreeVector n_bot_target = G4ThreeVector(0., -1., -1.);
+    G4ThreeVector n_top_target = G4ThreeVector(0., 1., 1.);
 
-  G4VisAttributes * copperVisAttributes = new G4VisAttributes(G4Colour(0.7, 0.4, 0.1));
-  // copperVisAttributes->SetForceWireframe(true); // Translucenty 
-  logicTube -> SetVisAttributes(copperVisAttributes); //Setting copper colour for copper
+    auto solidTarget1 = new G4CutTubs("WolfTarget", R_inner_target, R_outer_target, L_tube_target, phi_0_target, phi_1_target, n_bot_target, n_top_target);
 
-  //
-  // Target 1 layer
-  //
-  G4Material* target1_mat = nist->FindOrBuildMaterial("G4_W");
-  G4ThreeVector pos1 = G4ThreeVector(0, 0, 50.0 * mm - 1 * mm);
+    auto logicTarget1 = new G4LogicalVolume(solidTarget1,  // its solid
+                                            target1_mat,   // its material
+                                            "WolfTarget"); // its name
 
-  // Blinchik wolfram
-  G4double R_inner_target = 0 * mm;
-  G4double R_outer_target = 30 * mm;
-  G4double L_tube_target = 0.5 * mm;
-  G4double phi_0_target = 0;
-  G4double phi_1_target =  2 * M_PI;
-  G4ThreeVector n_bot_target = G4ThreeVector(0., -1., -1.);
-  G4ThreeVector n_top_target = G4ThreeVector(0., 1., 1.);
+    new G4PVPlacement(nullptr,        // no rotation
+                      pos1,           // at position
+                      logicTarget1,   // its logical volume
+                      "WolfTarget",   // its name
+                      logicWorld,     // its mother  volume
+                      false,          // no boolean operation
+                      0,              // copy number
+                      checkOverlaps); // overlaps checking
 
-  auto solidTarget1 = new G4CutTubs("WolfTarget", R_inner_target, R_outer_target, L_tube_target, phi_0_target, phi_1_target, n_bot_target, n_top_target);
+    G4VisAttributes *wolframVisAttributes = new G4VisAttributes(G4Colour(0.75, 0.75, 0.75));
+    // copperVisAttributes->SetForceWireframe(true); // Translucenty
+    logicTarget1->SetVisAttributes(wolframVisAttributes); // Setting copper colour for copper
 
-  auto logicTarget1 = new G4LogicalVolume(solidTarget1,  // its solid
-    target1_mat,                                        // its material
-    "WolfTarget");                                         // its name
+    //
+    // Sphere detector volume 1
+    //
+    G4ThreeVector pos4 = pos1;
+    // Rotation
+    G4RotationMatrix *rot4 = new G4RotationMatrix();
+    rot4->rotateX(0 * deg);
+    rot4->rotateY(0 * deg);
+    rot4->rotateZ(0 * deg);
 
-  new G4PVPlacement(nullptr,  // no rotation
-    pos1,                     // at position
-    logicTarget1,              // its logical volume
-    "WolfTarget",                 // its name
-    logicWorld,                 // its mother  volume
-    false,                    // no boolean operation
-    0,                        // copy number
-    checkOverlaps);           // overlaps checking
+    G4double Rmin_sph1 = 100 * mm;
+    G4double Rmax_sph1 = 125 * mm;
+    G4double SPhi_sph1 = 0 * deg;
+    G4double DPhi_sph1 = 360 * deg;
+    G4double STheta_sph1 = 0 * deg;
+    G4double DTheta_sph1 = 360 * deg;
 
-  G4VisAttributes * wolframVisAttributes = new G4VisAttributes(G4Colour(0.75, 0.75, 0.75));
-  // copperVisAttributes->SetForceWireframe(true); // Translucenty 
-  logicTarget1 -> SetVisAttributes(wolframVisAttributes); //Setting copper colour for copper
+    auto solidSphere1 = new G4Sphere("AirDetector", Rmin_sph1, Rmax_sph1, SPhi_sph1, DPhi_sph1, STheta_sph1, DTheta_sph1);
 
-  //
-  // Target 2 layer
-  //
-  G4Material* target2_mat = nist->FindOrBuildMaterial("G4_Cu");
-  G4ThreeVector pos2 = G4ThreeVector(0, 0, 50.0 * mm);
+    auto logicSphere1 = new G4LogicalVolume(solidSphere1,  // its solid
+                                            world_mat,     // its material
+                                            "AirSphere1"); // its name
 
-  // Blinchik cuprum
+    new G4PVPlacement(rot4,           // rotation
+                      pos4,           // at position
+                      logicSphere1,   // its logical volume
+                      "AirSphere1",   // its name
+                      logicWorld,     // its mother  volume
+                      false,          // no boolean operation
+                      0,              // copy number
+                      checkOverlaps); // overlaps checking
 
-  auto solidTarget2 = new G4CutTubs("CuTarget", R_inner_target, R_outer_target, L_tube_target, phi_0_target, phi_1_target, n_bot_target, n_top_target);
+    G4VisAttributes *sphericalVisAttributes = new G4VisAttributes(G4Colour(0.25, 0.25, 0.25));
+    sphericalVisAttributes->SetForceWireframe(true); // Translucenty
+    logicSphere1->SetVisAttributes(sphericalVisAttributes);
 
-  auto logicTarget2 = new G4LogicalVolume(solidTarget2,  // its solid
-    target2_mat,                                        // its material
-    "CuTarget");                                         // its name
+    //
+    // Sphere detector volume 2
+    //
 
-  new G4PVPlacement(nullptr,  // no rotation
-    pos2,                     // at position
-    logicTarget2,              // its logical volume
-    "CuTarget",                 // its name
-    logicWorld,                 // its mother  volume
-    false,                    // no boolean operation
-    0,                        // copy number
-    checkOverlaps);           // overlaps checking
+    G4double Rmin_sph2 = 126 * mm;
+    G4double Rmax_sph2 = 150 * mm;
 
-  // G4VisAttributes * copperVisAttributes = new G4VisAttributes(G4Colour(0.7, 0.4, 0.1));
-  // copperVisAttributes->SetForceWireframe(true); // Translucenty 
-  logicTarget2 -> SetVisAttributes(copperVisAttributes); //Setting copper colour for copper
+    auto solidSphere2 = new G4Sphere("AirDetector", Rmin_sph2, Rmax_sph2, SPhi_sph1, DPhi_sph1, STheta_sph1, DTheta_sph1);
 
-  //
-  // Detector volume
-  //
-  G4ThreeVector pos3 = G4ThreeVector(0, 0, L_tube);
-  //Rotation
-    G4RotationMatrix* rot3 = new G4RotationMatrix();
-    rot3->rotateX(-90 * deg);
-    rot3->rotateY(0 * deg);
-    rot3->rotateZ(0 * deg);
+    auto logicSphere2 = new G4LogicalVolume(solidSphere2,  // its solid
+                                            world_mat,     // its material
+                                            "AirSphere2"); // its name
 
+    new G4PVPlacement(rot4,           // rotation
+                      pos4,           // at position
+                      logicSphere2,   // its logical volume
+                      "AirSphere2",   // its name
+                      logicWorld,     // its mother  volume
+                      false,          // no boolean operation
+                      0,              // copy number
+                      checkOverlaps); // overlaps checking
 
-  G4double  Rmin_det = 36 * mm;
-  G4double  Rmax_det = 50 * mm; 
-  G4double  SPhi_det = 0 * deg;
-  G4double  DPhi_det = 180 * deg;
-  G4double  STheta_det = 0 * deg;
-  G4double  DTheta_det =  180 * deg;
-  
-  auto solidDetector = new G4Sphere("AirDetector", Rmin_det, Rmax_det, SPhi_det, DPhi_det, STheta_det, DTheta_det);
+    logicSphere2->SetVisAttributes(sphericalVisAttributes);
 
-  auto logicDetector = new G4LogicalVolume(solidDetector,  // its solid
-    world_mat,                                        // its material
-    "AirDetector");                                         // its name
+    //
+    // Sphere detector volume 3
+    //
 
-  new G4PVPlacement(rot3,  // rotation
-    pos3,                     // at position
-    logicDetector,              // its logical volume
-    "AirDetector",                 // its name
-    logicWorld,                 // its mother  volume
-    false,                    // no boolean operation
-    0,                        // copy number
-    checkOverlaps);           // overlaps checking
-  
-  G4VisAttributes * detectorVisAttributes = new G4VisAttributes(G4Colour(0.5, 0.5, 0.5));
-  detectorVisAttributes->SetForceWireframe(true); // Translucenty 
-  logicDetector -> SetVisAttributes(detectorVisAttributes);
+    G4double Rmin_sph3 = 151 * mm;
+    G4double Rmax_sph3 = 175 * mm;
 
+    auto solidSphere3 = new G4Sphere("AirDetector", Rmin_sph3, Rmax_sph3, SPhi_sph1, DPhi_sph1, STheta_sph1, DTheta_sph1);
 
-  //
-  // Detector volume 0.7 * m
-  //
-  G4ThreeVector pos4 = G4ThreeVector(0, 0, L_tube + 0.7 * m);
-  //No Rotation
+    auto logicSphere3 = new G4LogicalVolume(solidSphere3,  // its solid
+                                            world_mat,     // its material
+                                            "AirSphere3"); // its name
 
+    new G4PVPlacement(rot4,           // rotation
+                      pos4,           // at position
+                      logicSphere3,   // its logical volume
+                      "AirSphere3",   // its name
+                      logicWorld,     // its mother  volume
+                      false,          // no boolean operation
+                      0,              // copy number
+                      checkOverlaps); // overlaps checking
 
-  G4double R_inner_det07 = 0 * mm;
-  G4double R_outer_det07 = 200 * cm;
-  G4double L_tube_det07 = 1 * mm;
-  G4double phi_0_det07 = 0;
-  G4double phi_1_det07 =  2 * M_PI;
-  
-  auto solidDetector07 = new G4Tubs("AirDetector_07", R_inner_det07, R_outer_det07, L_tube_det07, phi_0_det07, phi_1_det07);
+    logicSphere3->SetVisAttributes(sphericalVisAttributes);
 
-  auto logicDetector07 = new G4LogicalVolume(solidDetector07,  // its solid
-    world_mat,                                        // its material
-    "AirDetector_07");                                         // its name
+    //
+    // Sphere detector volume 4
+    //
 
-  new G4PVPlacement(nullptr,  // rotation
-    pos4,                     // at position
-    logicDetector07,              // its logical volume
-    "AirDetector_07",                 // its name
-    logicWorld,                 // its mother  volume
-    false,                    // no boolean operation
-    0,                        // copy number
-    checkOverlaps);           // overlaps checking
-  
-  G4VisAttributes * detectorVisAttributes_07 = new G4VisAttributes(G4Colour(0.5, 0.5, 0.5));
-  detectorVisAttributes_07->SetForceWireframe(true); // Translucenty 
-  logicDetector07 -> SetVisAttributes(detectorVisAttributes_07);
+    G4double Rmin_sph4 = 176 * mm;
+    G4double Rmax_sph4 = 200 * mm;
 
+    auto solidSphere4 = new G4Sphere("AirDetector", Rmin_sph4, Rmax_sph4, SPhi_sph1, DPhi_sph1, STheta_sph1, DTheta_sph1);
 
-  //
-  // Detector volume 1 * m
-  //
-  G4ThreeVector pos5 = G4ThreeVector(0, 0, L_tube + 1. * m);
-  //No Rotation
+    auto logicSphere4 = new G4LogicalVolume(solidSphere4,  // its solid
+                                            world_mat,     // its material
+                                            "AirSphere4"); // its name
 
+    new G4PVPlacement(rot4,           // rotation
+                      pos4,           // at position
+                      logicSphere4,   // its logical volume
+                      "AirSphere4",   // its name
+                      logicWorld,     // its mother  volume
+                      false,          // no boolean operation
+                      0,              // copy number
+                      checkOverlaps); // overlaps checking
 
+    logicSphere4->SetVisAttributes(sphericalVisAttributes);
 
-  G4double R_inner_det10 = 0 * mm;
-  G4double R_outer_det10 = 200 * cm;
-  G4double L_tube_det10 = 1 * mm;
-  G4double phi_0_det10 = 0;
-  G4double phi_1_det10 =  2 * M_PI;
-  
-  auto solidDetector10 = new G4Tubs("AirDetector_10", R_inner_det10, R_outer_det10, L_tube_det10, phi_0_det10, phi_1_det10);
+    //
+    // Sphere detector volume 5
+    //
 
-  auto logicDetector10 = new G4LogicalVolume(solidDetector10,  // its solid
-    world_mat,                                        // its material
-    "AirDetector_10");                                         // its name
+    G4double Rmin_sph5 = 201 * mm;
+    G4double Rmax_sph5 = 225 * mm;
 
-  new G4PVPlacement(nullptr,  // rotation
-    pos5,                     // at position
-    logicDetector10,              // its logical volume
-    "AirDetector_10",                 // its name
-    logicWorld,                 // its mother  volume
-    false,                    // no boolean operation
-    0,                        // copy number
-    checkOverlaps);           // overlaps checking
-  
-  G4VisAttributes * detectorVisAttributes_10 = new G4VisAttributes(G4Colour(0.5, 0.5, 0.5));
-  detectorVisAttributes_10->SetForceWireframe(true); // Translucenty 
-  logicDetector10 -> SetVisAttributes(detectorVisAttributes_10);
+    auto solidSphere5 = new G4Sphere("AirDetector", Rmin_sph5, Rmax_sph5, SPhi_sph1, DPhi_sph1, STheta_sph1, DTheta_sph1);
 
+    auto logicSphere5 = new G4LogicalVolume(solidSphere5,  // its solid
+                                            world_mat,     // its material
+                                            "AirSphere5"); // its name
 
-  // Set AirDetector as scoring volume
-  //
-  fScoringVolume = logicDetector;
-  fScoringPan07 = logicDetector07;
-  fScoringPan10 = logicDetector10;
+    new G4PVPlacement(rot4,           // rotation
+                      pos4,           // at position
+                      logicSphere5,   // its logical volume
+                      "AirSphere5",   // its name
+                      logicWorld,     // its mother  volume
+                      false,          // no boolean operation
+                      0,              // copy number
+                      checkOverlaps); // overlaps checking
 
-  //
-  //always return the physical World
-  //
-  return physWorld;
-}
+    logicSphere5->SetVisAttributes(sphericalVisAttributes);
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+    //
+    // Sphere detector volume 6
+    //
+
+    G4double Rmin_sph6 = 226 * mm;
+    G4double Rmax_sph6 = 250 * mm;
+
+    auto solidSphere6 = new G4Sphere("AirDetector", Rmin_sph6, Rmax_sph6, SPhi_sph1, DPhi_sph1, STheta_sph1, DTheta_sph1);
+
+    auto logicSphere6 = new G4LogicalVolume(solidSphere6,  // its solid
+                                            world_mat,     // its material
+                                            "AirSphere5"); // its name
+
+    new G4PVPlacement(rot4,           // rotation
+                      pos4,           // at position
+                      logicSphere6,   // its logical volume
+                      "AirSphere6",   // its name
+                      logicWorld,     // its mother  volume
+                      false,          // no boolean operation
+                      0,              // copy number
+                      checkOverlaps); // overlaps checking
+
+    logicSphere6->SetVisAttributes(sphericalVisAttributes);
+
+    // Set AirDetector as scoring volume
+    //
+    fScoringVolume1 = logicSphere1;
+    fScoringVolume2 = logicSphere2;
+    fScoringVolume3 = logicSphere3;
+    fScoringVolume4 = logicSphere4;
+    fScoringVolume5 = logicSphere5;
+    fScoringVolume6 = logicSphere6;
+
+    //
+    // always return the physical World
+    //
+    return physWorld;
+  }
+
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 }
