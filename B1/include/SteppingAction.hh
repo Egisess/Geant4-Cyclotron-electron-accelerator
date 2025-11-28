@@ -11,7 +11,7 @@
 // * Neither the authors of this software system, nor their employing *
 // * institutes,nor the agencies providing financial support for this *
 // * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
+// * regarding  this software system or assume any liability for its  *
 // * use.  Please see the license in the file  LICENSE  and URL above *
 // * for the full disclaimer and the limitation of liability.         *
 // *                                                                  *
@@ -32,31 +32,29 @@
 
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
+#include <vector>
 
 class G4LogicalVolume;
 
 namespace B1
 {
+  class EventAction;
 
-class EventAction;
-
-/// Stepping action class
-
-class SteppingAction : public G4UserSteppingAction
-{
+  /// Stepping action class
+  class SteppingAction : public G4UserSteppingAction
+  {
   public:
-    SteppingAction(EventAction* eventAction);
+    SteppingAction(EventAction *eventAction);
     ~SteppingAction() override = default;
 
     // method from the base class
-    void UserSteppingAction(const G4Step*) override;
+    void UserSteppingAction(const G4Step *) override;
 
   private:
-    EventAction* fEventAction = nullptr;
-    G4LogicalVolume* fScoringVolume = nullptr;
-    G4LogicalVolume* fScoringPan07 = nullptr;
-    G4LogicalVolume* fScoringPan10 = nullptr;
-};
+    EventAction *fEventAction = nullptr;
+    std::vector<G4LogicalVolume *> fScoringVolumes;
+    bool fVolumesInitialized = false;
+  };
 
 }
 
