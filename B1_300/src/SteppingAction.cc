@@ -65,14 +65,93 @@ namespace B1_300
       const auto detConstruction = static_cast<const DetectorConstruction *>(
           G4RunManager::GetRunManager()->GetUserDetectorConstruction());
 
+      // Получаем старые scoring volumes (если они есть)
       fScoringVolumes = detConstruction->GetScoringVolumes();
+
+      // Получаем водяные детекторы
+      fWaterDetectors = detConstruction->GetWaterDetectors();
+
+      // Создаём map для быстрого поиска
+      for (size_t i = 0; i < fWaterDetectors.size(); ++i)
+      {
+        fWaterDetectorMap[fWaterDetectors[i]] = i;
+      }
+
+      G4cout << "SteppingAction initialized with " << fWaterDetectors.size()
+             << " water detectors" << G4endl;
+
       fVolumesInitialized = true;
     }
 
-    // Получаем текущий объем
+    // Получаем текущий объем и физический объем
     G4LogicalVolume *volume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume();
+    G4VPhysicalVolume *physVol = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
 
-    // Проверяем, находимся ли мы в одном из детекторных объемов
+    // Получаем энергию, отложенную в этом шаге
+    G4double edepStep = step->GetTotalEnergyDeposit();
+
+    // Если энергия не отложена, можно выйти (опционально)
+    if (edepStep == 0.)
+    {
+      return;
+    }
+
+    // Добавляем энергию в EventAction для общего подсчета
+    fEventAction->AddEdep(edepStep);
+
+    // ============================================================
+    // Обработка ВОДЯНЫХ ДЕТЕКТОРОВ
+    // ============================================================
+    auto it = fWaterDetectorMap.find(volume);
+    if (it != fWaterDetectorMap.end())
+    {
+      // Мы в водяном детекторе!
+      G4int copyNo = physVol->GetCopyNo();
+
+      // Получаем информацию о частице
+      G4int trackID = step->GetTrack()->GetTrackID();
+      G4String particleName = step->GetTrack()->GetParticleDefinition()->GetParticleName();
+
+      // Координаты
+      G4ThreeVector position = step->GetPreStepPoint()->GetPosition();
+      G4double x = position.x();
+      G4double y = position.y();
+      G4double z = position.z();
+
+      // Кинетическая энергия
+      G4double kinEn = step->GetPreStepPoint()->GetKineticEnergy();
+
+      // Получаем индексы ячейки
+      const auto detConstruction = static_cast<const DetectorConstruction *>(
+          G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+      G4int ix, iy, iz;
+      detConstruction->GetIndices(copyNo, ix, iy, iz);
+
+      // Записываем в выходной файл
+      FILE *f_out = fopen(output_name, "a");
+      if (f_out)
+      {
+        // Проверяем, является ли частица гамма-квантом
+        if (particleName == "gamma")
+        {
+          fprintf(f_out, "%d %d %d %d %d %e %e %e %e %s %e\n",
+                  trackID,                                 // Номер трека
+                  copyNo,                                  // Номер ячейки (уникальный)
+                  ix, iy, iz,                              // Индексы ячейки в решётке
+                  x / mm, y / mm, z / mm,                  // Координаты в мм
+                  kinEn / keV,                             // Кинетическая энергия в кэВ
+                  static_cast<char const *>(particleName), // Тип частицы
+                  edepStep / keV);                         // Отложенная энергия в кэВ
+        }
+        fclose(f_out);
+      }
+
+      return; // Выходим, обработали водяной детектор
+    }
+
+    // ============================================================
+    // Обработка СТАРЫХ ДЕТЕКТОРОВ (сферы) - если они активны
+    // ============================================================
     int detectorNumber = -1;
     for (size_t i = 0; i < fScoringVolumes.size(); ++i)
     {
@@ -83,7 +162,7 @@ namespace B1_300
       }
     }
 
-    // Если мы не в детекторном объеме, выходим
+    // Если мы не в старом детекторном объеме, выходим
     if (detectorNumber == -1)
     {
       return;
@@ -109,17 +188,11 @@ namespace B1_300
     // Кинетическая энергия при входе в детектор
     G4double kinEn = step->GetPreStepPoint()->GetKineticEnergy();
 
-    // Энергия, отложенная в этом шаге
-    G4double edepStep = step->GetTotalEnergyDeposit();
-
-    // Добавляем энергию в EventAction для общего подсчета
-    fEventAction->AddEdep(edepStep);
-
-    // Записываем в выходной файл
+    // Записываем в выходной файл (старый формат)
     FILE *f_out = fopen(output_name, "a");
     if (f_out)
     {
-      fprintf(f_out, "%d %d %e %e %e %e %s %e\n",
+      fprintf(f_out, "SPHERE %d %d %e %e %e %e %s %e\n",
               trackID,                                 // Номер частицы
               detectorNumber,                          // Номер детектора (1-6)
               x / mm, y / mm, z / mm,                  // Координаты входа в мм

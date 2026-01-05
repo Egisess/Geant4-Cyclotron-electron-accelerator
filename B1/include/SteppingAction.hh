@@ -33,6 +33,7 @@
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
 #include <vector>
+#include <map>
 
 class G4LogicalVolume;
 
@@ -52,10 +53,16 @@ namespace B1
 
   private:
     EventAction *fEventAction = nullptr;
+
+    // Old scoring volumes (spheres)
     std::vector<G4LogicalVolume *> fScoringVolumes;
+
+    // Water detector grid
+    std::vector<G4LogicalVolume *> fWaterDetectors;
+    std::map<G4LogicalVolume *, G4int> fWaterDetectorMap; // Fast lookup: volume -> copyNo
+
     bool fVolumesInitialized = false;
   };
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
