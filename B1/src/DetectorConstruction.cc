@@ -253,17 +253,17 @@ namespace B1
 
     G4Material *water_material = nist->FindOrBuildMaterial("G4_WATER");
 
-    double start_x = -300 * mm;
-    double start_z = -300 * mm;
+    double start_x = -500 * mm;
+    double start_z = -500 * mm;
     double start_y = -100 * mm;
 
-    double end_x = 300 * mm;
-    double end_z = 300 * mm;
-    double end_y = -200 * mm;
+    double end_x = 500 * mm;
+    double end_z = 500 * mm;
+    double end_y = -600 * mm;
 
     double dx = 50 * mm;
     double dz = 50 * mm;
-    double dy = 5 * mm;
+    double dy = 20 * mm;
 
     // Calculate number of cells in each direction
     fNX = (int)((end_x - start_x) / dx);
