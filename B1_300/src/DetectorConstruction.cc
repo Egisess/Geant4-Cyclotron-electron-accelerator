@@ -255,15 +255,15 @@ namespace B1_300
 
     double start_x = -500 * mm;
     double start_z = -500 * mm;
-    double start_y = -100 * mm;
+    double start_y = -1000 * mm;
 
     double end_x = 500 * mm;
     double end_z = 500 * mm;
-    double end_y = -600 * mm;
+    double end_y = -1050 * mm;
 
     double dx = 50 * mm;
     double dz = 50 * mm;
-    double dy = 20 * mm;
+    double dy = 2 * mm;
 
     // Calculate number of cells in each direction
     fNX = (int)((end_x - start_x) / dx);
