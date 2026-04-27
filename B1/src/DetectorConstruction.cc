@@ -92,7 +92,7 @@ namespace B1
     // Blinchik wolfram
     G4double R_inner_target = 0 * mm;
     G4double R_outer_target = 60 * mm;
-    G4double L_tube_target = 0.5 * mm;
+    G4double L_tube_target = 2 * mm;
     G4double phi_0_target = 0;
     G4double phi_1_target = 2 * M_PI;
     G4ThreeVector n_bot_target = G4ThreeVector(0., -1, -std::sqrt(3));
@@ -247,19 +247,19 @@ namespace B1
     //                   false,
     //                   0,
     //                   checkOverlaps);
-    // logicSphere6->// Radiation capacitors - Water detector grid
+    // logicSphere6->SetVisAttributes(sphericalVisAttributes);
 
-    // Radiation capacitors - Water detector grid
+    // // Radiation capacitors - Water detector grid
 
     G4Material *water_material = nist->FindOrBuildMaterial("G4_WATER");
 
     double start_x = -500 * mm;
     double start_z = -500 * mm;
-    double start_y = -1000 * mm;
+    double start_y = -50 * mm;
 
     double end_x = 500 * mm;
     double end_z = 500 * mm;
-    double end_y = -1050 * mm;
+    double end_y = -100 * mm;
 
     double dx = 50 * mm;
     double dz = 50 * mm;
@@ -330,7 +330,7 @@ namespace B1
 
     G4cout << "Total water detector cells created: " << cellCounter << G4endl;
 
-    // Set scoring volumes
+    // // Set scoring volumes
     // fScoringVolume1 = logicSphere1;
     // fScoringVolume2 = logicSphere2;
     // fScoringVolume3 = logicSphere3;
