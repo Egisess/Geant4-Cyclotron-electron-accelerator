@@ -255,11 +255,11 @@ namespace B1
 
     double start_x = -500 * mm;
     double start_z = -500 * mm;
-    double start_y = -50 * mm;
+    double start_y = -300 * mm;
 
     double end_x = 500 * mm;
     double end_z = 500 * mm;
-    double end_y = -100 * mm;
+    double end_y = -350 * mm;
 
     double dx = 50 * mm;
     double dz = 50 * mm;
